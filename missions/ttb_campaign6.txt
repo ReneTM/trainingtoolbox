@@ -1,0 +1,81 @@
+"mission"
+{
+	"Name"		"trainingtoolbox6"
+	"Version"	"1"
+	"Author"	"Valve"
+	"Website"	"http://store.steampowered.com"
+
+	"DisplayTitle"	"#L4D360UI_CampaignName_C6"
+	"Description"	"#L4D360UI_CampaignName_C6Objective"
+	"Image"		"maps/c6"
+	"OuttroImage"	"vgui/outroTitle_ThePassing"
+
+	"x360ctx"	"8"
+	"dlcmask"	"0x0000000000000002"
+
+	"meleeweapons"	"knife;riot_shield;fireaxe;frying_pan;machete;baseball_bat;crowbar;cricket_bat;tonfa;katana;electric_guitar;golfclub;pitchfork;shovel"
+	"allow_cola"	"0"
+	"no_wpn_restore"	"1"		// on player wipe, don't keep any weapons
+	"no_female_boomers"	"1"		// Can't have female Boomers because there's no audio support
+
+	// Loading poster data
+	"poster"
+	{
+		"posterImage"		            "LoadingScreen_ThePassing"
+		"posterImage_widescreen"		"LoadingScreen_ThePassing_widescreen"
+		
+		"fullscreen"		"1"
+		
+		"posterTitle"		"#L4D360UI_CampaignTitle_C6"
+		"posterTitle_y"		"320"
+		
+		"posterTagline"		"#L4D360UI_CampaignTagline_C6"
+		"posterTagline_y"	"380"
+		
+		"l4d2_names"				"1"
+		
+		"gambler_player_name_x"		"9999"
+		"gambler_player_name_y"		"9999"
+		
+		"producer_player_name_x"	"9999"		
+		"producer_player_name_y"	"9999"	
+		
+		"coach_player_name_x"		"9999"	
+		"coach_player_name_y"		"9999"	
+		
+		"mechanic_player_name_x"	"9999"
+		"mechanic_player_name_y"	"9999"
+
+		"character_order"		"mechanic;producer;coach;gambler"
+	}
+
+
+	"modes"
+	{
+		"trainingtoolbox"
+		{
+			"1"
+			{
+				"Map" "c6m1_riverbank"
+				"DisplayName" "#L4D360UI_LevelName_COOP_C6M1"
+				"Image" "maps/c6m1_riverbank"
+				"WitchVariant" "models/infected/witch_bride.mdl"
+			}
+
+			"2"
+			{
+				"Map" "c6m2_bedlam"
+				"DisplayName" "#L4D360UI_LevelName_COOP_C6M2"
+				"Image" "maps/c6m2_bedlam"
+			}
+
+			"3"
+			{
+				"Map" "c6m3_port"
+				"DisplayName" "#L4D360UI_LevelName_COOP_C6M3"
+				"Image" "maps/c6m3_port"
+			}
+
+		}
+	}
+}

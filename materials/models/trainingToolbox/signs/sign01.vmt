@@ -1,0 +1,6 @@
+UnlitGeneric
+{
+	$baseTexture	"models/trainingtoolbox/signs/sign01"
+	$translucent	"1"
+	$angle 			"90"
+}

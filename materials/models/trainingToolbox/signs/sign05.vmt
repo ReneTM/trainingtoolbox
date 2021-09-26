@@ -1,0 +1,7 @@
+UnlitGeneric
+{
+$baseTexture "models\trainingToolbox\signs\sign05"
+
+	$translucent	"1"
+	$angle 			"90"
+}

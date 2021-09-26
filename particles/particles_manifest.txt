@@ -1,0 +1,5 @@
+particles_manifest
+{
+	"file"		"particles/spawn_circle.pcf"	
+	"file"		"particles/trainingtoolbox_fx.pcf"
+}
