@@ -188,7 +188,7 @@ function ShowMyKeys(ent){
 	local scope = GetValidatedScriptScope(ent)
 	if("showingKeys" in scope){
 		scope.showingKeys = !scope.showingKeys
-		ClientPrint(null, 5, WHITE + "Displaying " + GREEN + ent.GetPlayerName() + "'s " + WHITE + " key inputs is " + (!scope.showingKeys ? GREEN + "enabled" : ORANGE + "disabled") + WHITE + " now")
+		ClientPrint(null, 5, WHITE + "Displaying " + GREEN + ent.GetPlayerName() + "'s " + WHITE + " key inputs is " + (scope.showingKeys ? GREEN + "enabled" : ORANGE + "disabled") + WHITE + " now")
 	}
 }
 

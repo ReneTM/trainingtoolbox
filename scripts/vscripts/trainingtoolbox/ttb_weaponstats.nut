@@ -200,9 +200,9 @@ weaponStats <-
 	{
 		name = "cricket_bat",damageType = "Blunt",swingInterval = 0.86,type = "secondary",slot = 1,Range = "All melees got a range of 70 units"
 	}
-	goldclub =
+	golfclub =
 	{
-		name = "goldclub",damageType = "Blunt",swingInterval = "0.73/0.83",type = "secondary",slot = 1,Range = "All melees got a range of 70 units"
+		name = "golfclub",damageType = "Blunt",swingInterval = "0.73/0.83",type = "secondary",slot = 1,Range = "All melees got a range of 70 units"
 	}
 	tonfa =
 	{
@@ -300,11 +300,11 @@ function outputWeaponStats(player, weapon){
 
 	if(!(weapon in weaponStats)){
 		ClientPrint(null, 5, "Active item / weapon is not part of the statistic data " + weapon)
-		return;
+		return
 	}
-	//
+
 	local weaponTable = weaponStats[weapon]
-	//
+
 	ClientPrint(player,1," ")
 	ClientPrint(player,1,"--------------- GENERAL -------------")
 	ClientPrint(player,1," ")
