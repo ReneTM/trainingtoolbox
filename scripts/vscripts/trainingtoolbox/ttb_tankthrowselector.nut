@@ -68,6 +68,18 @@ function TankThrowSelector(){
 
 function OnGameEvent_ability_use(params){
 	
+	// Debug for ability_use
+	// ------------------------------------------------------
+	
+	if(Convars.GetFloat("sv_cheats") == 1.0 || developer()){
+		printl("Ability event!")
+		printl("-------------------");
+		foreach(k,v in params){
+			printl(k + " = " + v);
+		}
+		printl("\n\n");
+	}
+	
 	if(!tankrockSelectorEnabled){
 		return
 	}

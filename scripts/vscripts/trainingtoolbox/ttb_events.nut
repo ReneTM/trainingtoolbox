@@ -109,6 +109,7 @@ function OnGameEvent_player_say(params){
 					case "pipe":			ent.GiveItem("weapon_pipe_bomb");				break
 					case "molo":			ent.GiveItem("weapon_molotov");					break
 
+					case "fireworks":		giveSlot5Item(ent,"weapon_fireworkcrate");		break
 					case "propane":			giveSlot5Item(ent,"weapon_propanetank");		break
 					case "gascan":			giveSlot5Item(ent,"weapon_gascan");				break
 					case "oxygen":			giveSlot5Item(ent,"weapon_oxygentank");			break
@@ -151,6 +152,7 @@ function OnGameEvent_player_say(params){
 					case "frags":			fragStatsOutput(ent);							break
 					case "lerp":			getPlayerRates(ent);							break
 					case "autobhop":		toggleBunnyHopForPlayer(ent);					break
+					case "checkbhops":		toggleBhopCheck(ent);							break
 
 					case "falldamagedebug":		fallDamageDebug(ent);						break
 					case "penetrationtest":		penetrationTest(ent);						break
@@ -164,7 +166,11 @@ function OnGameEvent_player_say(params){
 					case "toggleparticles":		toggleParticles();							break
 					case "toggledummyangles":	toggleDummyAngles();						break
 					case "eventdebug":			EventDebugPrintToggle(ent);					break
-
+					case "examplerock":			spawnExampleRock(ent);						break
+					case "distancetoexamplerock": getDistanceToExampleRock(ent);			break
+					case "togglenadeprediction"	: ToggleNadePrediction(ent);				break
+					case "distancetest":		SetWalkDistanceTest(ent);					break
+					
 					case "undorocklaunchers":	removeRockLaunchers();						break
 					case "burninginfected":		burningInfectedToggle();					break
 					case "god":					toggleGodMode(ent);							break
@@ -176,25 +182,38 @@ function OnGameEvent_player_say(params){
 					case "tanktoysalwaysvisible":	ToggleAlwaysShowTankToys();				break
 
 					case "kill":				killHumanPlayer(ent);						break	
-					case "becomehunter":		becomeZombie(ent, ZOMBIETYPES.HUNTER);	PlayScreenEffect(ent, scrFx.classChange.infected);	break
-					case "becomejockey":		becomeZombie(ent, ZOMBIETYPES.JOCKEY);	PlayScreenEffect(ent, scrFx.classChange.infected);	break
-					case "becomecharger":		becomeZombie(ent, ZOMBIETYPES.CHARGER);	PlayScreenEffect(ent, scrFx.classChange.infected);	break
-					case "becomesmoker":		becomeZombie(ent, ZOMBIETYPES.SMOKER);	PlayScreenEffect(ent, scrFx.classChange.infected);	break
-					case "becomespitter":		becomeZombie(ent, ZOMBIETYPES.SPITTER);	PlayScreenEffect(ent, scrFx.classChange.infected);	break
-					case "becomeboomer":		becomeZombie(ent, ZOMBIETYPES.BOOMER);	PlayScreenEffect(ent, scrFx.classChange.infected);	break
-					case "becometank":			becomeZombie(ent, ZOMBIETYPES.TANK)	;	PlayScreenEffect(ent, scrFx.classChange.infected);	break
+					case "becomehunter":		becomeZombie(ent, ZOMBIETYPES.HUNTER);		break
+					case "becomejockey":		becomeZombie(ent, ZOMBIETYPES.JOCKEY);		break
+					case "becomecharger":		becomeZombie(ent, ZOMBIETYPES.CHARGER);		break
+					case "becomesmoker":		becomeZombie(ent, ZOMBIETYPES.SMOKER);		break
+					case "becomespitter":		becomeZombie(ent, ZOMBIETYPES.SPITTER);		break
+					case "becomeboomer":		becomeZombie(ent, ZOMBIETYPES.BOOMER);		break
+					case "becometank":			becomeZombie(ent, ZOMBIETYPES.TANK);		break
 					case "tankrockselector":	toggletankrockselector();					break
 					case "toggleghostmode":		ToggleGhostMode(ent);						break
 					case "becomesurvivor":		switchToSurvivors(ent);	PlayScreenEffect(ent, scrFx.classChange.survivor);					break
 					case "spectate":			spectate(ent);								break
 				
+					case "thirdperson":			SetThirdperson(ent, 1);						break
+					case "firstperson":			SetThirdperson(ent, 0);						break
+				
+					case "fogoff":				setFogVisibility(ent, false);				break
+					case "fogon":				setFogVisibility(ent, true);				break
+					case "sky":					toggleBrushElement(ent, "sky");				break
+					case "clips":				toggleBrushElement(ent, "clip");			break
+					case "playerclips":			toggleBrushElement(ent, "playerclip");		break
+					case "infectedclips":		toggleBrushElement(ent, "infectedclip");	break
+					case "showsaferoom":		MarkSaferoom();								break
+					case "ceilingspots":		SpawnCeilingMarkers();						break
 					case "ceiling":				makeCeiling(ent);							break
 					case "showmykeys":			ShowMyKeys(ent);							break
 					case "removebots":			RemoveSurvivorBots();						break
 					case "addbot":				AddBot();									break
 					case "showdamage":			ToggleShowDamage();							break
-				
+					case "movebots":			botmover(ent, null);						break
+					case "botsholdpositions":	BotsHoldSavedPositions();					break
 					case "stattrack":			TrackStatsToggle(ent);						break
+					case "unlockview":			UnlockViewAngles(ent);						break
 				}
 			}
 			
@@ -202,7 +221,7 @@ function OnGameEvent_player_say(params){
 				switch(command){
 					
 					case "script":		executeScript(parameter,ent);							break
-
+					case "camera":		CameraToggle(parameter,ent);							break
 					case "hunter" :		createSpawnSet(InfectedData.hunter, parameter, ent);	break
 					case "jockey" :		createSpawnSet(InfectedData.jockey, parameter, ent);	break
 					case "charger" :	createSpawnSet(InfectedData.charger, parameter, ent);	break
@@ -236,6 +255,10 @@ function OnGameEvent_player_say(params){
 					case "cvar":				SetConvar(ent, parameter);					break
 					case "dummy":				SpawnDummy(ent, parameter);					break
 					case "bots":				SetAllowSurvivorBots(parameter);			break
+					case "timescale":			setTimeScale(ent, parameter);				break
+					case "movebot":				botmover(ent, parameter);					break
+					case "savebotposition":		SaveBotPosition(ent, parameter);			break
+					case "lockview":			LockViewAngles(ent, parameter);				break
 				}
 			}
 			if(command != null){
@@ -250,6 +273,14 @@ function OnGameEvent_player_say(params){
 		}
 	}
 }
+
+function OnGameEvent_gameinstructor_nodraw(params){
+	if(!Director.IsFirstMapInScenario()){
+		return;
+	}	
+	SkipIntro();
+}
+
 
 function GivePrimaryAndSecondaryAmmo(player){
 	player.GiveAmmo(999)
@@ -271,13 +302,19 @@ function GivePrimaryAndSecondaryAmmo(player){
 
 function giveSlot5Item(player,itemname){
 	local currentItemCount = 0
-	local propane	= null;	local propaneCount	= 0
-	local oxygen	= null;	local oxygenCount	= 0
-	local gascan	= null;	local gascanCount	= 0
-	local gnome		= null;	local gnomeCount	= 0
-	local cola		= null;	local colaCount		= 0
+	local propane	= null;	local propaneCount		= 0
+	local oxygen	= null;	local oxygenCount		= 0
+	local gascan	= null;	local gascanCount		= 0
+	local gnome		= null;	local gnomeCount		= 0
+	local cola		= null;	local colaCount			= 0
+	local fireworks = null; local fireworksCount 	= 0
 	
 	switch(itemname){
+		case "weapon_fireworkcrate":
+		while(oxygen = Entities.FindByModel(oxygen, "models/props_equipment/oxygentank01.mdl")){ oxygenCount++;}
+		if(oxygenCount < 4){ player.GiveItem(itemname)} else { sendWarning(player, "Limit of " + itemname + " reached") }
+		break
+		
 		case "weapon_cola_bottles":
 		while(cola = Entities.FindByClassname(cola, "weapon_cola_bottles")){ colaCount++; }
 		if(colaCount < 4){ player.GiveItem(itemname)} else { sendWarning(player, "Limit of " + itemname + " reached") }
@@ -413,4 +450,129 @@ function OnGameEvent_finale_win(params){
 
 function OnGameEvent_server_pre_shutdown(params){
 	ClearSavedTables()
+}
+
+
+
+
+// Since we got playercontrolledzombies in trainingtoolbox.txt we save the first saferoom spawn position
+// which the player gets teleported back to in player_first_spawn
+// ----------------------------------------------------------------------------------------------------------------------------
+
+function OnGameEvent_player_entered_checkpoint(params){
+	local ent = GetPlayerFromUserID(params["userid"])
+	local scope = GetValidatedScriptScope(ent)
+	if(!("entered_checkpoint_position" in scope)){
+		scope["entered_checkpoint_position"] <- ent.GetOrigin();
+	}
+}
+
+// Since we got playercontrolledzombies in trainingtoolbox.txt we have to ensure the player
+// gets turned into a survivor when he spawns as infected ghost
+// ----------------------------------------------------------------------------------------------------------------------------
+
+function OnGameEvent_player_first_spawn(params){
+	local ent = GetPlayerFromUserID(params["userid"])
+	
+	if(!IsEntityValid(ent)){
+		return;
+	}
+	
+	if(IsPlayerABot(ent)){
+		return;
+	}
+	
+	if(trainingActive){
+		spectate(ent)
+		ClientPrint(null, 5, "" + ent.GetPlayerName() + " got switched to spectators. Disable training and join survivors via !becomesurvivor")
+	}else{
+		if(ent.GetZombieType() != ZOMBIETYPES.SURVIVOR){
+			switchToSurvivors(ent)
+			
+			local scope = GetValidatedScriptScope(ent)
+			if(("entered_checkpoint_position" in scope)){
+				ent.SetOrigin(scope["entered_checkpoint_position"]);
+			}else{
+				ent.SetOrigin(Entities.FindByClassname(null, "info_player_start").GetOrigin())
+			}
+			printl("Moved " + ent.GetPlayerName() + " to survivors for initial spawn!")
+		}	
+	}
+}
+
+
+
+
+//
+//
+// ----------------------------------------------------------------------------------------------------------------------------
+function OnGameEvent_player_connect(tParams){
+	if (tParams["networkid"] != "BOT")
+	{
+		printl(format("[%s] SteamID - %s UserID - %d", tParams["name"], tParams["networkid"], tParams["userid"]));
+		ClientPrint(null, 3, format("Player %s has joined the game", tParams["name"]))
+	}
+}
+
+
+
+function OnGameEvent_player_disconnect(params){
+
+	//g_ModeScript.DeepPrintTable(params);
+	if(!("userid" in params)){
+		return;
+	}
+	
+	local player = GetPlayerFromUserID(params["userid"]);
+
+	if(!IsEntityValid(player)){
+		return;
+	}
+	
+	local initialTeam = NetProps.GetPropInt(player, "m_iInitialTeamNum");
+	
+	if (initialTeam == 0){
+		return;
+	}
+		
+	local currentTeam = NetProps.GetPropInt(player, "m_iTeamNum");
+	if (currentTeam != initialTeam){
+		NetProps.SetPropInt(player, "m_iTeamNum", initialTeam);
+		printl("Initial team has been set");
+	}
+}
+
+
+function OnGameEvent_player_team(params){
+	
+	if (!("userid" in params)){
+		return;
+	}
+	local player = GetPlayerFromUserID(params["userid"]);
+	
+	if(!IsEntityValid(player)){
+		return;
+	}
+
+	if("team" in params){
+		NetProps.SetPropInt(player, "m_iInitialTeamNum", params.team);	
+	}
+	
+	local initialTeam = NetProps.GetPropInt(player, "m_iInitialTeamNum");
+	if (initialTeam == 0){
+		return;	
+	}
+	
+	
+	local curTeam = NetProps.GetPropInt(player, "m_iTeamNum");
+	if ("team" in params && params.team != 0){
+		NetProps.SetPropInt(player, "m_iInitialTeamNum", params.team);
+
+	}
+	
+	// Causes a crash
+	if (curTeam != initialTeam){
+		//NetProps.SetPropInt(player, "m_iTeamNum", initialTeam);
+		printl(player + " current: " + curTeam + "  init: " + initialTeam)
+	}
 }

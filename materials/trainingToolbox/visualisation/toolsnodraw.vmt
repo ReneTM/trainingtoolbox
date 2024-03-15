@@ -1,0 +1,6 @@
+UnlitGeneric
+{
+	$basetexture "trainingtoolbox/visualisation/toolsnodraw"
+	$nofog 1
+	$translucent 1
+}

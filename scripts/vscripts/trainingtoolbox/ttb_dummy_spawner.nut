@@ -24,7 +24,7 @@
 		return
 	}
 	
-	if(IsSetInGlobal("AllowSurvivorBots") && !ttbGlobal["AllowSurvivorBots"]){
+	if(!IsSetInGlobal("AllowSurvivorBots") || !ttbGlobal["AllowSurvivorBots"]){
 		ClientPrint(null, 5, "Survivor bots are currently disabled. Type !bots 1 to enable them")
 		return
 	}
@@ -48,7 +48,7 @@
 	local b = null
 	while(b = Entities.FindByClassname(b, "player")){
 		if(NetProps.GetPropInt(b, "m_iTeamNum") == 4){
-			ClientPrint(null, 5, "" + NetProps.GetPropInt(b, "m_survivorCharacter"))
+			// ClientPrint(null, 5, "" + NetProps.GetPropInt(b, "m_survivorCharacter"))
 			if(NetProps.GetPropInt(b, "m_survivorCharacter") == DummySurvivors[survivor]){
 				ClientPrint(null, 5, "This survivor is already spawned!")
 				return
@@ -68,6 +68,7 @@
 	NetProps.SetPropInt(DummySpawner, "m_character", DummySurvivors[survivor])
 	
 	DoEntFire("!self", "spawnsurvivor", "", 0.03, DummySpawner, DummySpawner)
+	EntFire("worldspawn", "RunScriptCode", "EnableDummyGlows()", 0.06)	
 }
 
 
@@ -87,6 +88,13 @@
 			}
 		}
 	}
+	while(ent = Entities.FindByClassname(ent, "survivor_bot")){
+		if(IsEntityValid(ent)){
+			if(IsPlayerABot(ent) && ent.IsSurvivor()){
+				ent.Kill()
+			}
+		}
+	}
 	removeDeathModels()
 }
 
@@ -98,7 +106,7 @@
 		ClientPrint(null, 5, "Disable the training to add bots!")
 		return
 	}
-	if(IsSetInGlobal("AllowSurvivorBots") && !ttbGlobal["AllowSurvivorBots"]){
+	if(!IsSetInGlobal("AllowSurvivorBots") || !ttbGlobal["AllowSurvivorBots"]){
 		ClientPrint(null, 5, "Survivor bots are currently disabled. Type !bots 1 to enable them")
 		return
 	}
@@ -119,4 +127,11 @@
 		}
 	}
 	return ents
+}
+
+
+::EnableDummyGlows <- function(){
+	foreach(dummy in GetDummyPlayers()){
+		NetProps.SetPropInt(dummy, "m_Glow.m_iGlowType",3)
+	}
 }

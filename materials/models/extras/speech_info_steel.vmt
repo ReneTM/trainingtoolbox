@@ -1,0 +1,16 @@
+VertexLitGeneric
+{
+$baseTexture "models/extras/speech_info_steel"
+
+$phongexponenttexture "models/extras/speech_info_exp"
+$envmap env_cubemap
+
+$phong 1
+$bumpmap "effects/flat_normal"
+$phongboost "175.0"
+$phongfresnelranges "[1.0 1.3 1.1]"
+$phongalbedotint 1
+$normalmapalphaenvmapmask 1
+$envmapfresnel 1
+$envmaptint "[2.5 1.5 .5]"
+}

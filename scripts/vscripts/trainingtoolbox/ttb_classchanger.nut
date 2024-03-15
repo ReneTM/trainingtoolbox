@@ -96,6 +96,11 @@ Convars.SetValue("z_tank_incapacitated_health", 0.0)
 		return
 	}
 	
+	if(IsGhost(player) && infectedNumber == ZOMBIETYPES.TANK){
+		ClientPrint(null, 5, "Technicly it is possible but in normal gameplay there are no tank ghosts!")
+		return;
+	}
+	
 	removeAllParents(player)
 	RemoveInfectedEntities(player)
 	ResetAbilityStates(player)
@@ -113,6 +118,8 @@ Convars.SetValue("z_tank_incapacitated_health", 0.0)
 	if(!IsInfected(player)){
 		NetProps.SetPropInt(player, "m_iTeamNum", TEAMS.INFECTED)
 	}
+	
+	NetProps.SetPropInt(player, "m_iVersusTeam", 2) // Might fix crashes?
 	
 	if(player.IsDead() || player.IsDying()){
 		local survDummyTable = { type = ZOMBIETYPES.HUNTER, pos = player.GetOrigin(), ang = QAngle(0,90,0) }
@@ -200,6 +207,19 @@ Convars.SetValue("z_tank_incapacitated_health", 0.0)
 	movementFix(player)
 	UpdateInfectedModels()
 	SetPlayerFlashlightState(player, true)
+	/*
+	local ability = NetProps.GetPropEntity(player, "m_customAbility")
+	
+	NetProps.SetPropFloat(player, "m_nextActivationTimer.m_timestamp", Time())
+	NetProps.SetPropFloat(player, "m_nextActivationTimer.m_duration", 1.0)
+	
+	NetProps.SetPropFloat(player, "m_activationSupressedTimer.m_timestamp", Time())
+	NetProps.SetPropFloat(player, "m_activationSupressedTimer.m_duration", 1.0)
+	
+	NetProps.SetPropFloat(player, "m_lungeAgainTimer.m_timestamp", Time())
+	NetProps.SetPropFloat(player, "m_lungeAgainTimer.m_duration", 1.0)
+	*/
+	PlayScreenEffect(player, scrFx.classChange.infected)
 }
 
 
@@ -234,6 +254,7 @@ Convars.SetValue("z_tank_incapacitated_health", 0.0)
 	
 	NetProps.SetPropInt(player, "m_isGhost", 0)
 	NetProps.SetPropInt(player,"m_zombieState", 0)
+	NetProps.SetPropInt(player, "m_iPlayerState", 0) // Fix for unusable melee
 	
 	removeAllParents(player)
 	RemoveInfectedEntities(player)
@@ -246,6 +267,8 @@ Convars.SetValue("z_tank_incapacitated_health", 0.0)
 		ZSpawn(survDummyTable)
 		switchToSurvivors(player)
 	}
+	
+	NetProps.SetPropInt(player, "m_iVersusTeam", 1) // Might fix crashes?
 	
 	killEntireLoadout(player)
     NetProps.SetPropInt(player, "m_iTeamNum", TEAMS.SURVIVOR)
@@ -632,6 +655,7 @@ function spectate(ent){
 		ClientPrint(null, 5, ORANGE + "You are already a spectator!")
 		return
 	}
+	setGodMode(ent, false);
 	killHumanPlayer(ent)
 	NetProps.SetPropInt(ent, "m_iTeamNum", 1)
 	NetProps.SetPropInt(ent, "m_bForcedObserverMode", 1)
@@ -648,6 +672,10 @@ function SetPlayerFlashlightState(ent, val){
 	}
 }
 
+function GetPlayerFlashlightState(ent){
+	return NetProps.GetPropInt(ent, "m_fEffects") & 4 ? true : false
+}
+
 
 
 
@@ -655,4 +683,85 @@ function IsSpectator(ent){
 	return (NetProps.GetPropInt(ent, "m_iTeamNum") == 1)
 }
 
+
+
+
+function infectedToggle(ent){
+	
+	local infectedToggleOrder = 
+	[
+		ZOMBIETYPES.BOOMER,
+		ZOMBIETYPES.SPITTER,
+		ZOMBIETYPES.SMOKER,
+		ZOMBIETYPES.CHARGER,
+		ZOMBIETYPES.HUNTER,
+		ZOMBIETYPES.JOCKEY
+	]
+	
+	if(!IsEntityValid(ent)){
+		return;
+	}
+	if(trainingActive){
+		return;
+	}
+	if(ent.IsSurvivor()){
+		return;
+	}
+	
+	if(IsPlayerABot(ent)){
+		return;
+	}
+	
+	if(!IsGhost(ent)){
+		return;
+	}
+	
+	local scope = GetValidatedScriptScope(ent)
+	
+	if(!("last_changed_infected_class_timestemp" in scope)){
+		scope["last_changed_infected_class_timestemp"] <- Time() - 0.53;
+	}
+	
+	if(Time() < scope["last_changed_infected_class_timestemp"] + 0.5){
+		return;
+	}
+	
+	scope["last_changed_infected_class_timestemp"] = Time();
+	
+	local currentInfectedClass = ent.GetZombieType();
+	
+	local nextInfectedClass = 0;
+	
+	if(infectedToggleOrder.find(currentInfectedClass) == infectedToggleOrder.len()){
+		nextInfectedClass = infectedToggleOrder[0];
+	}else{
+		nextInfectedClass = infectedToggleOrder.find(currentInfectedClass) + 1
+	}
+	
+	becomeZombie(ent, nextInfectedClass)
+}
+
+
+
+
+::DebugNetPropsForEntity <- function(index){
+	
+	local ent = EntIndexToHScript(index)
+	
+	if(!IsEntityValid(ent)){
+		return;
+	}
+	local props = [
+		"m_iTeamNum",
+		"m_iInitialTeamNum",
+		"m_zombieClass",
+		"m_iVersusTeam",
+		"m_survivorCharacter"
+		"m_Gender"
+	]
+	foreach(prop in props){
+		local propvalue = NetProps.GetPropInt(ent, prop)
+		printl(prop + ": " + propvalue);
+	}
+}
 

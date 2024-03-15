@@ -1,0 +1,5 @@
+"UnlitGeneric"
+{
+	$basetexture "chroma/glow_red"
+	$selfillum 1
+}

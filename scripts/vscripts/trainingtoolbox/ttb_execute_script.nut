@@ -11,12 +11,9 @@ function TrackStatsToggle(ent){
 	if(GetListenServerHost() != ent){
 		return
 	}
-	
-	if(text == "!trackstats"){
-		Convars.SetFloat("l4d_stats_nogameplaycheck", Convars.GetFloat("l4d_stats_nogameplaycheck") == 1.0 ? 0.0 : 1.0 )
-		ClientPrint(null, 5, "Tracking L4D2 Stats has been " + ( Convars.GetFloat("l4d_stats_nogameplaycheck") == 1.0 ? "enabled" : "disabled" ))
-		return
-	}
+	Convars.SetValue("l4d_stats_nogameplaycheck", Convars.GetFloat("l4d_stats_nogameplaycheck") == 1.0 ? 0.0 : 1.0 )
+	ClientPrint(null, 5, "Tracking L4D2 Stats has been " + ( Convars.GetFloat("l4d_stats_nogameplaycheck") == 1.0 ? "enabled" : "disabled" ))
+	return
 }
 
 

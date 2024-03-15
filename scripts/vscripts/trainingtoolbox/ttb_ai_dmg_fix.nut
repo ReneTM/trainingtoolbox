@@ -30,6 +30,7 @@ function hurtChargers(){
 
 storagetable	<- {}
 local SkeetDmg	= 150
+// local SkeetDmg = Convars.GetFloat("z_pounce_damage_interrupt")
 
 function skeetFix(){
 	foreach(hunter in PlayerGenerator()){

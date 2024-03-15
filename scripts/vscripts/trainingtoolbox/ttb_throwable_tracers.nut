@@ -33,7 +33,7 @@ function drawLine(ent){
 	local debugR = debugColor[0].tofloat()
 	local debugG = debugColor[1].tofloat()
 	local debugB = debugColor[2].tofloat()
-
+	ClientPrint(null,5,"" + NetProps.GetPropVector(ent, "m_vecAbsVelocity"))
 	local projectilePos = ent.GetOrigin()
 	
 	if("lastPos" in scope){

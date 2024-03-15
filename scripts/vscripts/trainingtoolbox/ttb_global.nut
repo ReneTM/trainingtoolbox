@@ -33,12 +33,14 @@ const GLOBAL_TABLE_NAME = "ttbGlobal"
 	return false
 }
 
-::RemoveFlag <- function(ent, val){
-	NetProps.SetPropInt(ent, "m_fFlags", NetProps.GetPropInt(ent, "m_fFlags") | val)
+::AddFlag <- function(ent, flag){
+	NetProps.SetPropInt(ent, "m_fFlags", NetProps.GetPropInt(ent, "m_fFlags") | flag)
 }
-::AddFlag <- function(ent, val){
+
+::RemoveFlag <- function(ent, flag){
 	NetProps.SetPropInt(ent, "m_fFlags", NetProps.GetPropInt(ent, "m_fFlags") & ~flag)
 }
+
 
 
 GetValidatedGlobalTable()

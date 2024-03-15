@@ -4,17 +4,7 @@
 //																						//
 //****************************************************************************************
 
-
-
-
-function MapChange(ent, mapAbbrev){
-	
-	if(GetListenServerHost() != ent){
-		ClientPrint(null, 5, ORANGE + "Only the host is allowed to change the map!")
-		return
-	}
-	
-	local validMaps =[
+local knownMaps = [
 		// DEAD CENTER
 		"c1m1_hotel","c1m2_streets","c1m3_mall","c1m4_atrium",
 		// DARK CARNIVAL
@@ -44,34 +34,60 @@ function MapChange(ent, mapAbbrev){
 		// THE LAST STAND
 		"c14m1_junkyard","c14m2_lighthouse",
 		// TTB
-		"c17m17",
-		"c2m1_highway_sky",
-		"c2m2_fairgrounds_sky"
+		"c17m17"
 	]
-	
-	foreach(mapname in validMaps){
+
+function GetGuessedMapFromAbbreviation(mapAbbrev){
+	foreach(mapname in knownMaps){
 		if(mapname.find(mapAbbrev) != null){
-			ChangeMap(mapname)
-			return
+			return mapname
 		}
 	}
-	ClientPrint(null, 5, ORANGE + "No map found with such name!")
-}	
+	return ""
+}
 
-
-
-
-MapChangeInProgress <- false
-
-function ChangeMap(mapname){
-	if(!MapChangeInProgress){
-		MapChangeInProgress = true
-		EntFire("worldspawn", "RunScriptCode", "ClientPrint(null,5, \"3\")", 0.0)
-		EntFire("worldspawn", "RunScriptCode", "ClientPrint(null,5, \"2\")", 1.0)
-		EntFire("worldspawn", "RunScriptCode", "ClientPrint(null,5, \"1\")", 2.0)
-		EntFire("worldspawn", "RunScriptCode", "SendToServerConsole(\"changelevel " + mapname + "\"" + ")", 3.0)
-	}else{
-		ClientPrint(null, 5, ORANGE + "Mapchange in progress!")
+function MapChange(ent, mapAbbrev){
+	
+	if(GetListenServerHost() != ent){
+		ClientPrint(null, 5, ORANGE + "Only the host is allowed to change the map!")
+		return;
 	}
+	
+	if(MapChangeInProgress){
+		return;
+	}
+	
+	local guessedMap = GetGuessedMapFromAbbreviation(mapAbbrev)
+	local perfectMatch = false;
+	if(mapAbbrev == guessedMap){
+		perfectMatch = true;
+	}
+
+	if(guessedMap != ""){
+		ChangeMap(guessedMap, true)
+	}else{
+		ClientPrint(null, 5, ORANGE + "This mapname is unknown to the mutation, but we gonna try...")
+		ChangeMap(mapAbbrev, false)
+	}
+}
+
+
+
+
+::MapChangeInProgress <- false
+
+function ChangeMap(mapname, completedMapName){
+	MapChangeInProgress = true
+	
+	if(completedMapName){
+		EntFire("worldspawn", "RunScriptCode", "ClientPrint(null,5, \"Autocompleted mapname: " + mapname + "\")", 0.0)
+	}
+	
+	EntFire("worldspawn", "RunScriptCode", "ClientPrint(null,5, \"3\")", 1.0)
+	EntFire("worldspawn", "RunScriptCode", "ClientPrint(null,5, \"2\")", 2.0)
+	EntFire("worldspawn", "RunScriptCode", "ClientPrint(null,5, \"1\")", 3.0)
+	EntFire("worldspawn", "RunScriptCode", "SendToServerConsole(\"changelevel " + mapname + "\"" + ")", 4.0)
+	EntFire("worldspawn", "RunScriptCode", "ClientPrint(null,5, \"Map has not been found!\")", 4.03)
+	EntFire("worldspawn", "RunScriptCode", "MapChangeInProgress=false", 4.06)
 }
 

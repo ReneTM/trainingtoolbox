@@ -62,14 +62,14 @@ function SetTankToysGlowingStatic(val){
 // Saves currently present tanktoys
 // ----------------------------------------------------------------------------------------------------------------------------
 
-tanktoys <- []
+::tanktoys <- []
 
 function SaveTankToys(){
 	foreach(ent in GetTanktoys()){
 		local model = ent.GetModelName()
 		local classname = ent.GetClassname()
 		local origin = ent.GetOrigin()
-		local ang  = ent.GetAngles()
+		local ang = ent.GetAngles()
 		tanktoys.append( { classname = classname, model = model, origin = origin, ang = ang } )
 	}
 }
@@ -94,7 +94,7 @@ function KillAllTankToys(){
 // Converts QAngle rotation to string angles
 // ----------------------------------------------------------------------------------------------------------------------------
 
-function QAngleToString(Q){
+::QAngleToString <- function(Q){
 	return ("" + Q.x + " " + Q.y + " " + Q.z)
 }
 
@@ -107,8 +107,17 @@ function QAngleToString(Q){
 function RespawnTankToys(){
 	
 	KillAllTankToys()
-	
+	local delay = 0;
 	foreach(saved in tanktoys){
+		
+		if(saved.classname == "prop_car_alarm"){
+			local car = AlarmCar(saved.origin + Vector(0,0,16), saved.ang);
+			local VStr = "Vector(" + saved.origin.x + "," + saved.origin.y + "," + saved.origin.z + ")"
+			local QStr = "QAngle(" + saved.ang.x + "," + saved.ang.y + "," + saved.ang.z + ")"
+			EntFire("worldspawn", "RunScriptCode", "SetCarPosition(" + VStr + "," + QStr + ")", 2.0)
+			continue;
+		}
+		
 		SpawnEntityFromTable(saved.classname, {
 			model = saved.model
 			origin = saved.origin + Vector(0,0,4)

@@ -1,4 +1,4 @@
-"trainingToolbox"
+"trainingtoolbox"
 {
 	"base"				"coop"
 	"maxplayers"		"4"
@@ -16,4 +16,6 @@
 		"survivor_limit" 4
 		"nb_update_frequency" 0.1
 	}
+	
+	"playercontrolledzombies" 1
 }

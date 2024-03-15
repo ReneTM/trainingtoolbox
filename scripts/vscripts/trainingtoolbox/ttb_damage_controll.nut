@@ -11,11 +11,29 @@ lastDamageVictim <- null
 
 function AllowTakeDamage(damageTable){
 	
+	//ClientPrint(null, 5, "FIX: WITCH WRONG TARGET ISSUE")
+	//ClientPrint(null, 5, "ADD: TANK FRUSTRATION NOTICE")
+	
+	//foreach(k,v in damageTable){
+	//	printl(k + v)
+	//}
+	
 	local victim = damageTable["Victim"]
 	local attacker = damageTable["Attacker"]
 	local damageType = damageTable["DamageType"]
 	local damageDone = damageTable["DamageDone"]
 	
+	
+	/*
+	Set commons being non solid after killing (blunt melees)
+	if(attacker && attacker.GetClassname() == "player" && victim && victim.GetClassname() == "infected"){
+		if(damageDone >= victim.GetHealth()){
+			NetProps.SetPropInt(victim, "m_Collision.m_usSolidFlags", 4);
+			NetProps.SetPropInt(victim, "m_Collision.m_nSolidType", 0);
+		}
+	}
+	*/
+
 	if(victim.IsPlayer() && attacker.IsPlayer()){
 		lastDamageDealer = attacker
 		lastDamageVictim = victim
@@ -30,15 +48,28 @@ function AllowTakeDamage(damageTable){
 	
 	if(printDamageToChat){
 		if(attacker.IsPlayer() && !IsPlayerABot(attacker)){
+			// m_hitGroup
+			local hitgroup = NetProps.GetPropInt(victim, "m_LastHitGroup")
+			local hitgroupname = GetHitGroupNameFromValue(hitgroup);
+			local hitgrouptext = " Hitgroup: " + hitgroupname + "(" + hitgroup + ")"
+			local maxhealth = victim.GetMaxHealth();
+			local health = victim.GetHealth();
+			local healthtext = " Health: " + health + "/" + maxhealth;
+			local attackerName = attacker.GetPlayerName()
+			local victimEntIndex = victim.GetEntityIndex()
+			
+			
+			//local text = format("%green %attackername %white did %damageDone to %victim", GREEN, attackerName, WHITE)
+			
 			switch(victim.GetClassname()){
-				case "witch"	:
-				ClientPrint(null, 5, GREEN + attacker.GetPlayerName() + WHITE + " did " + damageDone + " to " + victim + " " + victim.GetEntityIndex() )
+				case "witch" :
+				ClientPrint(null, 5, GREEN + attackerName + WHITE + " did " + damageDone + " to " + victim + hitgrouptext + healthtext)
 				break;
-				case "player"	:
-				ClientPrint(null, 5, GREEN + attacker.GetPlayerName() + WHITE + " did " + damageDone + " to " + victim.GetPlayerName() + " " + victim.GetEntityIndex() )
+				case "player" :
+				ClientPrint(null, 5, GREEN + attackerName + WHITE + " did " + damageDone + " to " + victim.GetPlayerName() + " [" + victim.GetEntityIndex() + "]" + hitgrouptext + healthtext)
 				break;	
-				case "infected"	:
-				ClientPrint(null, 5, GREEN + attacker.GetPlayerName() + WHITE + " did " + damageDone + " to " + victim + " " + victim.GetEntityIndex() )
+				case "infected" :
+				ClientPrint(null, 5, GREEN + attackerName + WHITE + " did " + damageDone + " to " + victim + hitgrouptext + healthtext)
 				break;
 			}
 		}
@@ -102,4 +133,28 @@ function AllowTakeDamage(damageTable){
 		}
 	}
 	return true
+}
+
+
+// m_hitGroup
+hitgroups <-
+{
+	HITGROUP_GENERIC = 0
+	HITGROUP_HEAD = 1
+	HITGROUP_CHEST = 2
+	HITGROUP_STOMACH = 3
+	HITGROUP_LEFTARM = 4
+	HITGROUP_RIGHTARM = 5
+	HITGROUP_LEFTLEG = 6
+	HITGROUP_RIGHTLEG = 7
+	HITGROUP_GEAR = 10
+}
+
+function GetHitGroupNameFromValue(hitgroupValue){
+	foreach(k,v in hitgroups){
+		if(v == hitgroupValue){
+			return k;
+		}
+	}
+	return "Unknown Hitgroup";
 }

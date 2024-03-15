@@ -5,7 +5,7 @@
 //****************************************************************************************
 
 
-::trainingtoolbox_version <- 1.5
+::trainingtoolbox_version <- 1.77
 
 scriptDebug <- Convars.GetFloat("developer")
 
@@ -41,6 +41,22 @@ IncludeScript("trainingtoolbox/ttb_key_listener")
 IncludeScript("trainingtoolbox/ttb_dummy_spawner")
 IncludeScript("trainingtoolbox/ttb_execute_script")
 IncludeScript("trainingtoolbox/ttb_tanktoy_respawn")
+IncludeScript("trainingtoolbox/ttb_ceiling_markers")
+IncludeScript("trainingtoolbox/ttb_perfect_bhop_check")
+IncludeScript("trainingtoolbox/ttb_time_scaler")
+IncludeScript("trainingtoolbox/ttb_bot_commands")
+IncludeScript("trainingtoolbox/ttb_nadeprediction")
+IncludeScript("trainingtoolbox/ttb_nav_functions")
+IncludeScript("trainingtoolbox/ttb_brush_element_toggle")
+IncludeScript("trainingtoolbox/ttb_alarmcar")
+IncludeScript("trainingtoolbox/ttb_doorfix")
+IncludeScript("trainingtoolbox/ttb_playercamera")
+IncludeScript("trainingtoolbox/ttb_lockers")
+IncludeScript("trainingtoolbox/ttb_motd")
+IncludeScript("trainingtoolbox/ttb_distance_tracker")
+IncludeScript("trainingtoolbox/ttb_jumplistener")
+IncludeScript("trainingtoolbox/ttb_hud_controller")
+IncludeScript("trainingtoolbox/ttb_sequence_controller")
 
 
 
@@ -63,6 +79,9 @@ function OnGameplayStart(){
 	removeExplosives()
 	createThinkTimer()
 	SaveTankToys()
+	createBulletTimerEntity()
+	DoorFix()
+	Start()
 }
 
 
@@ -72,6 +91,7 @@ getroottable()["TRACE_MASK_VISIBLE_AND_NPCS"] <- 33579137
 getroottable()["TRACE_MASK_PLAYER_SOLID"] <- 33636363
 getroottable()["TRACE_MASK_NPC_SOLID"] <- 33701899
 getroottable()["TRACE_MASK_SHOT"] <- 1174421507
+getroottable()["TRACE_MASK_GRENADES"] <- 33570827
 
 
 getroottable()["WHITE"]		<- "\x01"
@@ -238,7 +258,16 @@ function blackScreen(){
 
 function toggleTraining(ent){
 	
-	if(GetHumanInfected().len() > 0){
+	local humanInfectedCount = 0
+	foreach(ent in GetPlayers()){
+		if(!IsPlayerABot(ent)){
+			if(NetProps.GetPropInt(ent, "m_iTeamNum") == TEAMS.INFECTED){
+				humanInfectedCount++
+			}
+		}
+	}
+	
+	if(humanInfectedCount > 0){
 		ClientPrint(null, 5, "Human infected are restricted in training mode. Type !becomesurvivor to use the training mode.")
 		return
 	}
@@ -568,6 +597,12 @@ function stopTraining(){
 // ----------------------------------------------------------------------------------------------------------------------------
 
 function spawnSingleInfected(player, infected){
+	
+	if(infected == 8 && GetGhostPlayers().len() > 0){
+		sendWarning(player, "No tank spawn allowed when there are ghost players out there.")
+		return;
+	}
+	
 	if(!trainingActive){
 		local pointer = getPointerPos(player)
 		local spawnTable = { type = infected, pos = pointer + Vector(0,0,16), ang = QAngle(0,90,0) }
@@ -589,6 +624,20 @@ function spawnSingleInfected(player, infected){
 
 
 
+
+// Check if there are any ghosting players
+// ----------------------------------------------------------------------------------------------------------------------------
+
+function GetGhostPlayers(){
+	local ents = [];
+	local ent = null;
+	while(ent = Entities.FindByClassname(ent, "player")){
+		if(!IsEntityValid(ent)) continue;
+		if(!IsGhost(ent)) continue;
+		ents.append(ent);
+	}
+	return ents;
+}
 
 // Timed infected spawning
 // ----------------------------------------------------------------------------------------------------------------------------
@@ -674,7 +723,6 @@ function Think(){
 	drawInfectedHitbox()	
 	getPlayersOnGroundStates()
 	getPlayerChargingStates()
-	getHeldPlayerButtons()
 	playerIsHittingUSE()
 	timedInfectedSpawning()
 	setTankRockModel()
@@ -686,6 +734,12 @@ function Think(){
 	TankThrowSelector()
 	KeyListener()
 	RemoveBotSurvivors()
+	perfectBhopCheck()
+	BotWalkController()
+	NadePrediction()
+	SetSavedViewAngles()
+	DistanceTracker()
+	JumpListener()
 }
 
 
@@ -819,37 +873,9 @@ function showCommands(player,selection){
 
 
 
-// Apendix ticker hud
-// ----------------------------------------------------------------------------------------------------------------------------
 
-function CreateTickerOnlyHUD(message){
-   TickerHUD <-
-   {
-		Fields =
-		{
-			ticker =
-			{
-				slot = HUD_TICKER,
-				name = "ticker",
-				flags = HUD_FLAG_ALIGN_CENTER | HUD_FLAG_BLINK
-			}
-		}
-   }
-	Ticker_AddToHud( TickerHUD, message )
-	Ticker_SetTimeout(20);
-	Ticker_SetBlink(1);
-	Ticker_SetBlinkTime(5)
-	HUDSetLayout(TickerHUD)
-	HUDPlace( HUD_TICKER, 0.25, 0.04, 0.5, 0.08 )
-}
 
-local hudMessage = "" +
-"---------- Welcome to TrainingToolbox ----------\n" +
-"type !commands in chat for a list of all commands\n"
-
-CreateTickerOnlyHUD(hudMessage);
-
-printAsci()
+printAsci();
 
 __CollectEventCallbacks(this, "OnGameEvent_", "GameEventCallbacks", RegisterScriptGameEventListener)
 

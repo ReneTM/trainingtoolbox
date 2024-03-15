@@ -532,41 +532,43 @@ function getFloatingPlayers(){
 // ----------------------------------------------------------------------------------------------------------------------------
 
 function savePlayerPosition(player){
-	if(!trainingActive){
-		if(getNoclippingPlayers().find(player) == null){
-			if(getFloatingPlayers().find(player) == null){
-				if(!playerIsCapped(player)){
-					savedPlayerPositions[player] <- { pos = player.GetOrigin(), ang = player.EyeAngles() }
-					ClientPrint(player, 5, BLUE + "Position saved")
-				}else{
-					ClientPrint(player, 5, "You cannot save your position while being capped")
-				}
-			}else{
-				ClientPrint(player, 5, "Touch the ground to save your position")
-			}
-		}else{
-			ClientPrint(player, 5, "Disable noclip to save your position")
-		}
-	}else{
-		ClientPrint(player, 5, "Saving positions is only available in non-training mode")
+	if(trainingActive){
+		ClientPrint(player, 5, "Saving positions is only available in non-training mode");
+		return;
 	}
+	if(getNoclippingPlayers().find(player) != null){
+		ClientPrint(player, 5, "It is not allowed to save positions of noclipping players");
+		return;
+	}
+	if(getFloatingPlayers().find(player) != null){
+		ClientPrint(player, 5, "It is not allowed to save player positions while being mid air");
+		return;
+	}
+	if(playerIsCapped(player)){
+		ClientPrint(player, 5, "You cannot save players positions while being capped");
+		return;
+	}
+	savedPlayerPositions[player] <- { pos = player.GetOrigin(), ang = player.EyeAngles() }
+	ClientPrint(player, 5, BLUE + "Position saved");
 }
 
+
+
 function loadPlayerPosition(player){
-	if(!trainingActive){
-		if(player in savedPlayerPositions){
-			if(!playerIsCapped(player)){
-				player.SetOrigin(savedPlayerPositions[player].pos)
-				player.SnapEyeAngles(savedPlayerPositions[player].ang)
-			}else{
-				ClientPrint(player, 5, "You cannot load a saved position while being capped")
-			}
-		}else{
-			ClientPrint(player, 5, "No saved position yet")
-		}
-	}else{
-		ClientPrint(player, 5, "Saving positions is only available in non-training mode")
+	if(trainingActive){
+		ClientPrint(player, 5, "Saving positions is only available in non-training mode");
+		return;
 	}
+	if(!(player in savedPlayerPositions)){
+		ClientPrint(player, 5, "No saved position yet");
+		return;
+	}
+	if(playerIsCapped(player)){
+		ClientPrint(player, 5, "You cannot load a saved position while being capped");
+		return;
+	}
+	player.SetOrigin(savedPlayerPositions[player].pos)
+	player.SnapEyeAngles(savedPlayerPositions[player].ang)
 }
 
 
@@ -968,6 +970,7 @@ function setNeededCvars(){
 	Convars.SetValue("z_spawn_flow_limit", 999999)
 	Convars.SetValue("director_no_death_check", 1)
 	Convars.SetValue("director_spectate_specials", 1)
+	Convars.SetValue("sb_all_bot_game", 1)
 	//
 	// Tank
 	Convars.SetValue("sv_tankpropfade", 0)
@@ -979,7 +982,18 @@ function setNeededCvars(){
 	Convars.SetValue("hunter_pounce_ready_range", 4096)
 	Convars.SetValue("hunter_committed_attack_range", 4096)
 	// Let´s send hunters flying
-	Convars.SetValue("phys_pushscale", 1)
+	Convars.SetValue("phys_pushscale", 1)					 	// default:  1
+	// Make spawns quicker for testing
+	Convars.SetValue("z_ghost_delay_max",5)					 	// default: 30
+	Convars.SetValue("z_ghost_delay_min",5)					 	// default: 20
+	Convars.SetValue("z_ghost_delay_minspawn",2)			 	// default:  3
+	Convars.SetValue("z_ghost_checkpoint_spawn_interval", 5) 	// default: 30
+	Convars.SetValue("z_ghost_finale_spawn_interval",5)		 	// default: 20
+	Convars.SetValue("z_ghost_spawn_interval",5)				// default: 60
+	Convars.SetValue("versus_special_respawn_interval", 5)		// default: 20
+	Convars.SetValue("vs_max_team_switches", 999999)			// default:  1
+	// Disable Consistency check
+	Convars.SetValue("sv_consistency", 0)						// default:  1
 }
 
 
@@ -1148,7 +1162,6 @@ function toggleTankThrowsLogs(){
 			}
 		}
 	}
-
 }
 
 function setTankRockModel(){
@@ -1164,6 +1177,87 @@ function setTankRockModel(){
 			}
 		}
 	}
+}
+
+
+
+
+// Spawns a frozen tank rock, to test how "effect details" affects the draw distance of the tank rock
+// ----------------------------------------------------------------------------------------------------------------------------
+
+function spawnExampleRock(ent){
+	
+	if(trainingActive){
+		ClientPrint(ent, 5, "Disable the training to spawn an example rock");
+		return;
+	}
+	
+	local exampleRockCount = 0
+	local rock = null;
+	while(rock = Entities.FindByClassname(rock, "tank_rock")){
+		if(IsEntityValid(rock)){
+			local scope = GetValidatedScriptScope(rock);
+			if("example_rock" in scope){
+				exampleRockCount++;
+			}
+		}
+	}
+	
+	if(exampleRockCount > 0){
+		sendWarning(ent, "There is an example rock already!");
+		return;
+	}
+	
+	local pointer = getPointerPos(ent);
+	
+	if(!isPointerValid(pointer, 32, 96, ent)){
+		sendWarning(ent, "Invalid Position!");
+		return;
+	}
+	
+	local tankrock = SpawnEntityFromTable("tank_rock",
+	{
+		targetname = UniqueString("_example_rock"),
+		origin = pointer + Vector(0,0,62),
+		angles = "90 0 0",
+		rendercolor = "0 0 255"
+	});
+	NetProps.SetPropInt(tankrock, "movetype", 0);
+	local scope = GetValidatedScriptScope(tankrock);
+	scope["example_rock"] <- true;
+	
+	DoEntFire(tankrock.GetName(), "Kill", "", 32.0, tankrock, tankrock);
+	ClientPrint(ent, 5, "Example rock has been spawned. It will be gone in 32 seconds!");
+}
+
+
+
+
+// Prints distance from the players origin and eyeposition to tankrock to the chatbox
+// ----------------------------------------------------------------------------------------------------------------------------
+
+function getDistanceToExampleRock(ent){
+	if(trainingActive){
+		ClientPrint(ent, 5, "Disable the training to calculate the distance to the example rock!");
+		return;
+	}
+	local rock = null;
+	while( rock = Entities.FindByClassname(rock, "tank_rock")){
+		if(IsEntityValid(rock)){
+			local scope = GetValidatedScriptScope(rock);
+			if("example_rock" in scope){
+				local playerpos = ent.GetOrigin();
+				local playereyepos = ent.EyePosition();
+				local rockposition = rock.GetOrigin();
+				local distancetoeyes = (playereyepos-rockposition).Length();
+				local distancetoorigin =  (playerpos-rockposition).Length();
+				ClientPrint(ent, 5, WHITE + "Distance between players origin and example rock: " + BLUE + distancetoorigin + " units");
+				ClientPrint(ent, 5, WHITE + "Distance between players eyes and example rock: " + BLUE + distancetoeyes + " units");
+				return;
+			}
+		}
+	}
+	ClientPrint(ent, 5, "No example rock has been found!");
 }
 
 
@@ -1256,6 +1350,15 @@ function getPlayerRates(player){
 ::bunnyPlayers <- {}
 
 function toggleBunnyHopForPlayer(player){
+	
+	player.ValidateScriptScope();
+	local scope = player.GetScriptScope();
+	
+	if("perfect_bhop_check" in scope && scope["perfect_bhop_check"]){
+		ClientPrint(player, 5, "Disable perfect bhop check first!");
+		return
+	}
+	
 	if(player in bunnyPlayers){
 		bunnyPlayers.rawdelete(player)
 		ClientPrint(null, 5, BLUE + "Auto-BunnyHop has been disabled for " + player.GetPlayerName());
@@ -1272,6 +1375,7 @@ function toggleBunnyHopForPlayer(player){
 function autobhop(){
 	foreach(player in GetHumanPlayers())
 	{
+		NetProps.SetPropFloat(player, "m_flNextDecalTime", Time() - 10)			// Remove spray restriction
 		if(player in bunnyPlayers)
 		{
 			if(!(NetProps.GetPropInt(player, "m_fFlags") & 1) && NetProps.GetPropInt(player, "movetype") == 2)
@@ -1317,8 +1421,10 @@ function infiniteAmmo(){
 		local scope = player.GetScriptScope()
 		if("infinite_ammo" in scope && scope["infinite_ammo"] == true){
 			local wep = player.GetActiveWeapon()
-			if(wep.GetClassname() != "weapon_melee"){
-				wep.SetClip1(wep.GetMaxClip1())
+			if(IsEntityValid(wep)){
+				if(wep.GetClassname() != "weapon_melee"){
+					wep.SetClip1(wep.GetMaxClip1())
+				}	
 			}
 		}
 	}
@@ -1338,6 +1444,11 @@ function toggleGodMode(ent){
 		playerscope["godmode"] = !playerscope["godmode"]
 	}
 	ClientPrint(null, 5, WHITE + "Godmode has been " + BLUE + ( playerscope["godmode"] ? "enabled" : "disabled" ) + WHITE + " for " + BLUE + ent.GetPlayerName() )
+}
+
+function setGodMode(ent,val){
+	local playerscope = GetValidatedScriptScope(ent)
+	playerscope["godmode"] <- val ? true : false;
 }
 
 function HasGodModeEnabled(ent){
@@ -1582,12 +1693,26 @@ function SetConvar(ent, param){
 	local variable = paramArr[0]
 	local val = paramArr[1]
 	
-	Convars.SetValue(variable,val)
+	if(Convars.GetStr(variable) == null){
+		ClientPrint(null, 5, ORANGE + "Variable does not exist")
+		return
+	}
 	
-	if(Convars.GetFloat(variable) == val){
-		ClientPrint(null, 5, "Value changed!")
+	if(Convars.GetStr(variable) == val || Convars.GetFloat(variable) == val){
+		ClientPrint(null, 5, ORANGE + "Value of cvar is set to " + val + " already!")
+		return
+	}
+	
+	Convars.SetValue(variable,val)
+	EntFire("worldspawn", "RunScriptCode", "NextTickCvarCheck(\"" + variable + "\"" + "," + "\"" + val + "\")", 0.03)
+
+}
+
+::NextTickCvarCheck <- function(cvar,val){
+	if(Convars.GetFloat(cvar) != val && Convars.GetFloat(cvar) != val){
+		ClientPrint(null, 5, cvar + " changed to " + val)
 	}else{
-		ClientPrint(null, 5, "Variable does not exist or cannot be changed!")
+		ClientPrint(null, 5, "Variable cannot be changed!")
 	}
 }
 
@@ -1674,15 +1799,13 @@ function RemoveBotSurvivors(){
 
 
 
-// Remove null values in an array
+// Check if the entity is a valid one
 // ----------------------------------------------------------------------------------------------------------------------------
 
 ::IsEntityValid <- function(ent){
-	if(ent == null){
-		return false
-	}
-	return ent.IsValid()
+	return (ent && ent.IsValid())
 }
+
 
 
 
@@ -1739,6 +1862,16 @@ function WeaponStrip(ent, all){
 
 
 
+// Switch to perspective
+// ----------------------------------------------------------------------------------------------------------------------------
+
+function SetThirdperson(ent, val){
+	NetProps.SetPropFloat(ent, "m_TimeForceExternalView", val == 1 ? 2147483647 : 0)
+}
+
+
+
+
 // Play a screen effect
 // ----------------------------------------------------------------------------------------------------------------------------
 
@@ -1755,6 +1888,64 @@ scrFx <- {
 function PlayScreenEffect(ent, fxColor){
 	ScreenFade(ent, fxColor.x, fxColor.y, fxColor.z, 255, 1.0, 0.0, 1)
 }
+
+
+
+
+// Returns true when player is standing on any floor
+// ----------------------------------------------------------------------------------------------------------------------------
+
+function PlayerIsOnGround(ent){
+	return NetProps.GetPropInt(ent, "m_fFlags") & 1
+}
+
+
+
+
+// Skip any intro scenes
+// ----------------------------------------------------------------------------------------------------------------------------
+
+function SkipIntro(){
+    
+	local director = Entities.FindByClassname(null, "info_director");
+    
+	if(!IsEntityValid(director))
+    {
+        printl("info_director not found!");
+        return;
+    }
+    
+    DoEntFire("!self", "ReleaseSurvivorPositions", "", 1.0, null, director);
+    DoEntFire("!self", "FinishIntro", "", 1.0, null, director);
+    
+	local ent = null;
+	while(ent = Entities.FindByClassname(ent, "point_viewcontrol_survivor")){
+		if(IsEntityValid(ent)){
+			DoEntFire("!self", "StartMovement", "", 1.0, null, ent);
+		}
+	}
+    
+    ent = null;
+    while(ent = Entities.FindByClassname(ent, "point_viewcontrol_multiplayer")){
+        if(IsEntityValid(ent)){
+			DoEntFire("!self", "StartMovement", "", 1.0, null, ent);
+		}   
+    }
+    /*
+    local tbl = { origin = Vector(0, 0, 0), angles = QAngle(0, 0, 0), spawnflags = 1, rendercolor = "0 0 0", renderamt = 255, holdtime = 1, duration = 1 };
+    ent = SpawnEntityFromTable("env_fade", tbl);
+    if (!ent)
+    {
+        printl("Could not create env_fade!");
+        return;
+    }
+    ent.ValidateScriptScope();
+    
+    DoEntFire("!self", "Fade", "", 0, null, ent);
+    DoEntFire("!self", "Kill", "", 2.5, null, ent);
+	*/
+}
+
 
 
 

@@ -94,7 +94,7 @@ function tankDebug(ent){
 	if(OnLocalServer() && ent == GetListenServerHost()){
 		if(!trainingActive){
 			tankDebugModeActive = !tankDebugModeActive
-			Convars.SetValue("z_tank_rock_debug", (tankDebugModeActive ? 0:1))
+			Convars.SetValue("z_tank_rock_debug", (tankDebugModeActive ? 1 : 0))
 			ClientPrint(ent, 5, BLUE + "Tank debug mode " + (tankDebugModeActive ? "enabled" : "disabled"))
 		}else{
 			ClientPrint(ent, 5, "Disable the training to toggle this debug mode")

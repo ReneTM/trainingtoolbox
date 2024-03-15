@@ -93,34 +93,32 @@ function HasDisabledButton(ent, button){
 function KeyListener(){
 	foreach(ent in GetHumanPlayers()){
 		if(IsEntityValid(ent)){
-			if(PlayerIsDisplayingKeys(ent)){
-				ReadKey(ent, Keys.ATTACK, "Attack")
-				ReadKey(ent, Keys.JUMP, "Jump")
-				ReadKey(ent, Keys.DUCK, "Crouch")
-				ReadKey(ent, Keys.FORWARD, "Forward")
-				ReadKey(ent, Keys.BACKWARD, "Backward")
-				ReadKey(ent, Keys.USE, "Use")
-				ReadKey(ent, Keys.CANCEL, "Cancel")
-				ReadKey(ent, Keys.LEFT, "Left")
-				ReadKey(ent, Keys.RIGHT, "Right")
-				ReadKey(ent, Keys.MOVELEFT, "MoveLeft")
-				ReadKey(ent, Keys.MOVERIGHT, "MoveRight")
-				ReadKey(ent, Keys.ATTACK2, "Attack2")
-				ReadKey(ent, Keys.RUN, "Run")
-				ReadKey(ent, Keys.RELOAD, "Reload")
-				ReadKey(ent, Keys.ALT1, "Alt1")
-				ReadKey(ent, Keys.ALT2, "Alt2")
-				ReadKey(ent, Keys.SHOWSCORES, "Showscores")
-				ReadKey(ent, Keys.SPEED, "Speed")
-				ReadKey(ent, Keys.WALK, "Walk")
-				ReadKey(ent, Keys.ZOOM, "Zoom")
-				ReadKey(ent, Keys.WEAPON1, "Weapon1")
-				ReadKey(ent, Keys.WEAPON2, "Weapon2")
-				ReadKey(ent, Keys.BULLRUSH, "Bullrush")
-				ReadKey(ent, Keys.GRENADE1, "Grenade1")
-				ReadKey(ent, Keys.GRENADE2, "Grenade2")
-				ReadKey(ent, Keys.LOOKSPIN, "Lookspin")
-			}
+			ReadKey(ent, Keys.ATTACK, "Attack")
+			ReadKey(ent, Keys.JUMP, "Jump")
+			ReadKey(ent, Keys.DUCK, "Crouch")
+			ReadKey(ent, Keys.FORWARD, "Forward")
+			ReadKey(ent, Keys.BACKWARD, "Backward")
+			ReadKey(ent, Keys.USE, "Use")
+			ReadKey(ent, Keys.CANCEL, "Cancel")
+			ReadKey(ent, Keys.LEFT, "Left")
+			ReadKey(ent, Keys.RIGHT, "Right")
+			ReadKey(ent, Keys.MOVELEFT, "MoveLeft")
+			ReadKey(ent, Keys.MOVERIGHT, "MoveRight")
+			ReadKey(ent, Keys.ATTACK2, "Attack2")
+			ReadKey(ent, Keys.RUN, "Run")
+			ReadKey(ent, Keys.RELOAD, "Reload")
+			ReadKey(ent, Keys.ALT1, "Alt1")
+			ReadKey(ent, Keys.ALT2, "Alt2")
+			ReadKey(ent, Keys.SHOWSCORES, "Showscores")
+			ReadKey(ent, Keys.SPEED, "Speed")
+			ReadKey(ent, Keys.WALK, "Walk")
+			ReadKey(ent, Keys.ZOOM, "Zoom")
+			ReadKey(ent, Keys.WEAPON1, "Weapon1")
+			ReadKey(ent, Keys.WEAPON2, "Weapon2")
+			ReadKey(ent, Keys.BULLRUSH, "Bullrush")
+			ReadKey(ent, Keys.GRENADE1, "Grenade1")
+			ReadKey(ent, Keys.GRENADE2, "Grenade2")
+			ReadKey(ent, Keys.LOOKSPIN, "Lookspin")
 		}
 	}
 }
@@ -130,31 +128,67 @@ function KeyListener(){
 
 function ReadKey(ent, val, keyName){
 	// Accept Key and lock it untill it got released once
-	if((ent.GetButtonMask() & val) && !(HasDisabledButton(ent, val))){
-		AddDisabledButton(ent, val)
+	//if((ent.GetButtonMask() & val) && !(HasDisabledButton(ent, val))){
+	if((GetRealButtonMask(ent) & val) && !(HasDisabledButton(ent, val))){	
+	AddDisabledButton(ent, val)
 		PlayerPressedKey(ent, keyName)
 	}
 	// Unlock Key when unpressed
 	if(HasDisabledButton(ent, val)){
-		if(!(ent.GetButtonMask() & val)){
+		//if(!(ent.GetButtonMask() & val)){
+		if(!(GetRealButtonMask(ent) & val)){
 			RemoveDisabledButton(ent, val)
 			PlayerUnpressedKey(ent, keyName)
 		}
 	}
 }
 
-
+function GetRealButtonMask(ent){
+	return NetProps.GetPropInt(ent, "m_Local.m_nOldButtons");
+}
 
 
 // Events for button presses
 // ----------------------------------------------------------------------------------------------------------------------------
 
 function PlayerPressedKey(ent, key){
-	PrintCurrentKeys(ent)
+	
+	if(PlayerIsDisplayingKeys(ent)){
+		PrintCurrentKeys(ent)	
+	}
+	
+	if(key == "Showscores"){
+		ToggleNadeCameraState(ent)
+	}
+	
+	if(key == "Attack2"){
+		infectedToggle(ent)
+	}
+
+	if(key == "Use"){
+		if(!IsEntityValid(ent)){
+			return;
+		}
+		if(ent.GetZombieType() == 9){								// Survivors got "F" for the flashlight already
+			return;
+		}
+		if(ent.GetZombieType() == 8 && tankrockSelectorEnabled){	// We allow it for tanks but not when the tankrockselector is active
+			return;
+		}
+
+		local scope = GetValidatedScriptScope(ent)
+		if(!("infected_flashlight_info" in scope)){
+			ClientPrint(null, 5, "Keep in mind that disabling the flashlight is usually not possible for infected. This is just for testing purposes!")
+			scope["infected_flashlight_info"] <- true
+		}
+		SetPlayerFlashlightState(ent, !GetPlayerFlashlightState(ent))
+	}
 }
 
 function PlayerUnpressedKey(ent, key){
-	PrintCurrentKeys(ent)
+	if(PlayerIsDisplayingKeys(ent)){
+		PrintCurrentKeys(ent)	
+	}
 }
 
 
@@ -214,6 +248,19 @@ function PlayerIsDisplayingKeys(ent){
 
 function PrintCurrentKeys(ent){
 	local mask = ent.GetButtonMask()
+	
+	local scope = GetValidatedScriptScope(ent)
+	if(!("prev_btn_mask" in scope)){
+		scope["prev_btn_mask"] <- mask
+		scope["prev_btn_mask_time"] <- Time()
+	}
+	
+	if(mask == scope["prev_btn_mask"]){
+		if(Time() < scope["prev_btn_mask_time"] + 4){
+			return;
+		}
+	}
+	
 	local W = (mask & Keys.FORWARD) ? ORANGE + "W" : WHITE + "W"
 	local A = (mask & Keys.MOVELEFT) ? ORANGE + "A" : WHITE + "A"
 	local S = (mask & Keys.BACKWARD) ? ORANGE + "S" : WHITE + "S"

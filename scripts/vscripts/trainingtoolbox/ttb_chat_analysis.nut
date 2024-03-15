@@ -38,7 +38,7 @@ local arsenal =
 	// Become infected
 	"becomejockey","becomehunter","becomecharger","becomesmoker","becomespitter","becomeboomer","becometank","becomesurvivor","toggleghostmode","kill","tankrockselector","god","map","showmykeys",
 	"spectate","dummy","bots","removebots","addbot","showdamage","respawntanktoys","showtanktoys", "tanktoysalwaysvisible",
-	"strip", "stripall"
+	"strip", "stripall", "infectedtoggle", "checkbhops","timescale","movebot","movebots","botsholdpositions","savebotposition","camera","lockview","unlockview","distancetest"
 
 ]
 
@@ -65,11 +65,11 @@ local validCommands =
 	"skeeting","leveling","crowning","tonguecutting","deadstopping","intro","stopcommentary",
 	// Misc
 	"weaponstats","toggleparticles","toggledummyangles","frags","lerp","autobhop","skinswitch",
-	"infammo","burninginfected",
+	"infammo","burninginfected","thirdperson","firstperson"
 	// Infected Variants
-	"witchvariant","tankvariant","huntervariant","smokervariant", "boomervariant", "infected","cvar","ceiling"
+	"witchvariant","tankvariant","huntervariant","smokervariant", "boomervariant", "infected","cvar","ceiling","ceilingspots",
 	// Squirrel
-	"script", "raw", "squirreldebug", "stattrack"
+	"script", "raw", "squirreldebug", "stattrack","examplerock","distancetoexamplerock","togglenadeprediction","showsaferoom", "sky", "clips", "playerclips", "infectedclips", "fogon", "fogoff"
 
 ]
 

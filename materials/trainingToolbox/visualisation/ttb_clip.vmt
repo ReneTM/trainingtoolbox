@@ -1,0 +1,5 @@
+UnlitGeneric
+{
+	$basetexture "trainingtoolbox/visualisation/ttb_clip"
+	$nofog 1
+}

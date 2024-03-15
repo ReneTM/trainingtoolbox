@@ -27,7 +27,7 @@
 		modelData =
 		[
 			{ worldmodel = "models/infected/boomer.mdl", viewmodel = "models/v_models/weapons/v_claw_boomer.mdl" },
-			{ worldmodel = "models/infected/boomer_l4d1.mdl", viewmodel = "models/v_models/weapons/v_claw_boomer_l4d1.mdl" },
+			{ worldmodel = "models/infected/boomer_l4d1.mdl", viewmodel = "models/v_models/weapons/v_claw_boomer_l4d1.mdl" }
 		],
 		current = 0, min = 0, max = 1
 	},
@@ -37,7 +37,7 @@
 		modelData =
 		[
 			{ worldmodel = "models/infected/hunter.mdl", viewmodel = "models/v_models/weapons/v_claw_hunter.mdl" },
-			{ worldmodel = "models/infected/hunter_l4d1.mdl", viewmodel = "models/v_models/weapons/v_claw_hunter_l4d1.mdl" },
+			{ worldmodel = "models/infected/hunter_l4d1.mdl", viewmodel = "models/v_models/weapons/v_claw_hunter_l4d1.mdl" }
 		],
 		current = 0, min = 0, max = 1
 	},
@@ -177,7 +177,7 @@ function UpdateInfectedModels(){
 			SetWorldModel(ent, shouldBeModel)
 			InfectedData["boomer"].modelName = shouldBeModel
 			if(ent.GetClassname() == "player" && !IsPlayerABot(ent)){
-				SetViewmodel(ent, infectedVariants.boomer[infectedVariants.boomer.current].viewmodel)
+				SetViewmodel(ent, infectedVariants.boomer.modelData[infectedVariants.boomer.current].viewmodel)
 			}
 		}
 	}

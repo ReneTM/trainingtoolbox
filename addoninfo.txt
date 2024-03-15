@@ -2,7 +2,7 @@
 {
      addonSteamAppID         "550"
      addontitle              "TrainingToolbox"
-     addonversion            "20210911"
+     addonversion            "20230421"
      addontagline            "Training-Mutation"
      addonauthor             "ReneTM"
      addonURL0               "https://steamcommunity.com/sharedfiles/filedetails/?id=2237332273"
