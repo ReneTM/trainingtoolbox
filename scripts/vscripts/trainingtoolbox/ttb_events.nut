@@ -220,6 +220,7 @@ function OnGameEvent_player_say(params){
 			if(command != null && parameter != null){
 				switch(command){
 					
+					case "listenclass":	ToggleClassListener(parameter);							break
 					case "script":		executeScript(parameter,ent);							break
 					case "camera":		CameraToggle(parameter,ent);							break
 					case "hunter" :		createSpawnSet(InfectedData.hunter, parameter, ent);	break
