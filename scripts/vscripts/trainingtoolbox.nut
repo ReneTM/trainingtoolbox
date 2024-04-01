@@ -57,6 +57,7 @@ IncludeScript("trainingtoolbox/ttb_distance_tracker")
 IncludeScript("trainingtoolbox/ttb_jumplistener")
 IncludeScript("trainingtoolbox/ttb_hud_controller")
 IncludeScript("trainingtoolbox/ttb_sequence_controller")
+IncludeScript("trainingtoolbox/ttb_entity_listener")
 
 
 
@@ -740,6 +741,7 @@ function Think(){
 	SetSavedViewAngles()
 	DistanceTracker()
 	JumpListener()
+	EntityListener()
 }
 
 
