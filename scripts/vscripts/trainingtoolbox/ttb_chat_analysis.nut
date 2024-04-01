@@ -69,7 +69,8 @@ local validCommands =
 	// Infected Variants
 	"witchvariant","tankvariant","huntervariant","smokervariant", "boomervariant", "infected","cvar","ceiling","ceilingspots",
 	// Squirrel
-	"script", "raw", "squirreldebug", "stattrack","examplerock","distancetoexamplerock","togglenadeprediction","showsaferoom", "sky", "clips", "playerclips", "infectedclips", "fogon", "fogoff"
+	"script", "raw", "squirreldebug", "stattrack","examplerock","distancetoexamplerock","togglenadeprediction","showsaferoom","sky", "clips", "playerclips", "infectedclips", "fogon", "fogoff",
+	"listenclass"
 
 ]
 
