@@ -26,14 +26,12 @@ function throwableTracer(){
 // ----------------------------------------------------------------------------------------------------------------------------
 
 function drawLine(ent){
-	ent.ValidateScriptScope()
-	local scope = ent.GetScriptScope()
+	local scope = GetValidatedScriptScope(ent)
 	local ignorez = true
 	local debugColor = split(Convars.GetStr("proj_tracer_clr")," ")
 	local debugR = debugColor[0].tofloat()
 	local debugG = debugColor[1].tofloat()
 	local debugB = debugColor[2].tofloat()
-	ClientPrint(null,5,"" + NetProps.GetPropVector(ent, "m_vecAbsVelocity"))
 	local projectilePos = ent.GetOrigin()
 	
 	if("lastPos" in scope){
