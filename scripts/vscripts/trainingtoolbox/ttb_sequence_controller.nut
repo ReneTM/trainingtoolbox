@@ -1,6 +1,7 @@
+::sequencedebug <- true
 
 ::Start <- function(){
-	::mdl <- SpawnEntityFromTable("prop_dynamic", { model = "models/extras/info_speech_copper.mdl", DefaultAnim = "idle", RandomAnimation = 0} )
+	::mdl <- SpawnEntityFromTable("prop_dynamic", { model = "models/extras/info_speech_steel.mdl", DefaultAnim = "idle", RandomAnimation = 0, origin = Vector(0,0,128) } )
 	local sequences = GetSequenceNamesFromModel(mdl);
 	local cmds = FilterSequencesByContext(sequences, "C");
 	local code = GetConvertedCode(cmds);
