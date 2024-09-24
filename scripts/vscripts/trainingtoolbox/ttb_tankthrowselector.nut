@@ -68,29 +68,17 @@ function TankThrowSelector(){
 
 function OnGameEvent_ability_use(params){
 	
-	// Debug for ability_use
-	// ------------------------------------------------------
-	
-	if(Convars.GetFloat("sv_cheats") == 1.0 || developer()){
-		printl("Ability event!")
-		printl("-------------------");
-		foreach(k,v in params){
-			printl(k + " = " + v);
-		}
-		printl("\n\n");
-	}
-	
 	if(!tankrockSelectorEnabled){
 		return
 	}
 	
 	local ent = GetPlayerFromUserID(params.userid)
 	local ability = params.ability
-	ent.ValidateScriptScope()
+	local scope = GetValidatedScriptScope(ent)
 	if(ability == "ability_throw"){
-		if("queued_throw" in ent.GetScriptScope() && ent.GetScriptScope()["queued_throw"] != TankThrows.INVALID){
-			NetProps.SetPropInt(ent, "m_nSequence", THROW_SEQUENCE_BASE + ent.GetScriptScope()["queued_throw"])
-			ent.GetScriptScope()["queued_throw"] = TankThrows.INVALID
+		if("queued_throw" in scope && scope["queued_throw"] != TankThrows.INVALID){
+			NetProps.SetPropInt(ent, "m_nSequence", THROW_SEQUENCE_BASE + scope["queued_throw"])
+			scope["queued_throw"] = TankThrows.INVALID
 		} else {
 			NetProps.SetPropInt(ent, "m_nSequence", THROW_SEQUENCE_BASE + TankThrows.ONE_HAND_OVERHAND)
 		}
