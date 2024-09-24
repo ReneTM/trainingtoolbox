@@ -198,27 +198,3 @@ function showEscapeRoute(ent){
 		ClientPrint(ent, 5, "This debug function is only accessable for the local hosting player")
 	}
 }
-
-
-
-
-eventDebugPrint <- false
-
-function EventDebugPrintToggle(ent){
-	if(OnLocalServer() && ent == GetListenServerHost()){
-		eventDebugPrint = !eventDebugPrint
-		ClientPrint(null, 5, WHITE + "Debug print of events " + GREEN + ( eventDebugPrint ? "Enabled" : "Disabled" ))	
-		Convars.SetValue("display_game_events", (eventDebugPrint ? 1:0))
-	}else{
-		ClientPrint(ent, 5, "This debug function is only accessable for the local hosting player")
-	}
-}
-
-function PrintEventDebug(params){
-	if(eventDebugPrint){
-		foreach(key,val in params){
-			printl("Key: " + key + "    val: " + val)
-		}
-	}
-}
-
