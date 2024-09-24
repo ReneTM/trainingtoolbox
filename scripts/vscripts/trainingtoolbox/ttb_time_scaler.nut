@@ -5,7 +5,7 @@
 //****************************************************************************************
 
 
-
+isCustomScale <- false
 
 // Create a func_timescale entity for the "bullet time"
 // ----------------------------------------------------------------------------------------------------------------------------
@@ -16,8 +16,7 @@ function createBulletTimerEntity(){
 		ent.Kill()
 	}
 	
-	local entTable = 
-	{
+	local entTable = {
 		targetname = "timeScaler",
 		acceleration = 0.05,
 		angles = "0 0 0",
@@ -30,33 +29,40 @@ function createBulletTimerEntity(){
 	ent = SpawnEntityFromTable("func_timescale", entTable)
 }
 
-function setTimeScale(ent, speedValue){
-	
-	
-	if(ent != GetListenServerHost()){
-		ClientPrint(ent, 5, "Only the local host is allowed to change the time scale!");
-		return;
-	}
+function setTimeScale(ent, speedValue, fromchat){
 	
 	local speed = 0
-	
-	try{
-		speed = speedValue.tofloat();
-	}catch(err){
-		ClientPrint(null, 5, "Invalid Parameter for timescale!");
-		return;
+
+	if(fromchat){
+		if(ent != GetListenServerHost()){
+			ClientPrint(ent, 5, "Only the local host is allowed to change the time scale!");
+			return;
+		}
+		
+		try{
+			speed = speedValue.tofloat();
+		}catch(err){
+			ClientPrint(null, 5, "Invalid Parameter for timescale!");
+			return;
+		}
+		
+		if(GetListenServerHost() == null){
+			ClientPrint(null, 5, "Setting the timescale is only allowed while hosting locally!");
+			return;
+		}
+		
+		if(speed > 2 || speed < 0.25){
+			ClientPrint(null, 5, "Allowed time scale values are between 2 and 0.25!");
+			return;
+		}
+	}else{
+		try{
+			speed = speedValue;
+		}catch(err){
+			return;
+		}	
 	}
-	
-	if(!OnLocalServer()){
-		ClientPrint(null, 5, "Setting the timescale is only allowed while hosting locally!");
-		return;
-	}
-	
-	if(speed > 2 || speed < 0.25){
-		ClientPrint(null, 5, "Allowed time scale values are between 2 and 0.25!");
-		return;
-	}
-	
+
 	local scaler = Entities.FindByName(null, "timeScaler");
 	
 	if(!scaler){
@@ -65,14 +71,16 @@ function setTimeScale(ent, speedValue){
 	}
 	
 	if(speed == 1.0){
+		isCustomScale = false;
 		DoEntFire("!self", "Stop", "", 0.03, scaler, scaler);
-		ClientPrint(null, 5, "Time scale has been set to default.")
+		if(fromchat) ClientPrint(null, 5, "Time scale has been set to default.");
 		return;
 	}else{
+		isCustomScale = true;
 		DoEntFire("!self", "Stop", "", 0.03, scaler, scaler);
 		NetProps.SetPropFloat(scaler, "m_flDesiredTimescale", speed);
 		DoEntFire("!self", "Start", "", 0.06, scaler, scaler);
-		ClientPrint(null, 5, "Time scale has been set to " + speed);		
+		if(fromchat) ClientPrint(null, 5, "Time scale has been set to " + speed);	
 	}
 }
 
