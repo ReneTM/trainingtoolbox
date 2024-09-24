@@ -2,10 +2,9 @@
 {
      addonSteamAppID         "550"
      addontitle              "TrainingToolbox"
-     addonversion            "20230421"
+     addonversion            "20240924"
      addontagline            "Training-Mutation"
      addonauthor             "ReneTM"
      addonURL0               "https://steamcommunity.com/sharedfiles/filedetails/?id=2237332273"
      addonDescription        "This mutation gives the player a place to practice a variety of scenarios. At the start you will find a list of chat commands. You can also print the full list by chatting !commands. Single infected can be spawned on the crosshairs position, but it is also possible to place spawns manually. Spawns will happen when Training mode starts by chatting !training. You can re-chat !training to disable training mode."
 }
- 
