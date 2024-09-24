@@ -43,7 +43,8 @@ IncludeScript("trainingtoolbox/ttb_execute_script")
 IncludeScript("trainingtoolbox/ttb_tanktoy_respawn")
 IncludeScript("trainingtoolbox/ttb_ceiling_markers")
 IncludeScript("trainingtoolbox/ttb_perfect_bhop_check")
-IncludeScript("trainingtoolbox/ttb_time_scaler")
+::TimeScaler <- {}
+IncludeScript("trainingtoolbox/ttb_time_scaler", TimeScaler)
 IncludeScript("trainingtoolbox/ttb_bot_commands")
 IncludeScript("trainingtoolbox/ttb_nadeprediction")
 IncludeScript("trainingtoolbox/ttb_nav_functions")
@@ -58,6 +59,12 @@ IncludeScript("trainingtoolbox/ttb_jumplistener")
 IncludeScript("trainingtoolbox/ttb_hud_controller")
 IncludeScript("trainingtoolbox/ttb_sequence_controller")
 IncludeScript("trainingtoolbox/ttb_entity_listener")
+// IncludeScript("trainingtoolbox/ttb_tediore")
+IncludeScript("trainingtoolbox/ttb_weapon_spawn_debug")
+::EventDebugger <- {}
+IncludeScript("trainingtoolbox/ttb_event_debug", EventDebugger)
+::TankrockCamera <- {}
+IncludeScript("trainingtoolbox/ttb_tank_rock_camera", TankrockCamera);
 
 
 
@@ -80,7 +87,7 @@ function OnGameplayStart(){
 	removeExplosives()
 	createThinkTimer()
 	SaveTankToys()
-	createBulletTimerEntity()
+	TimeScaler.createBulletTimerEntity()
 	DoorFix()
 	Start()
 }
@@ -321,44 +328,56 @@ function resetSpawnTimeStamps(){
 
 function createSpawnSet(inf, spawntime, player){
 	
-	if(!(isNumeric(spawntime))){
-		ClientPrint(null, 5, "Invalid parameter: >" + spawntime + "<")
-		return
+	if(!isNumeric(spawntime)){
+		ClientPrint(null, 5, "Invalid parameter: >" + spawntime + "<");
+		return;
 	}
 	
 	spawntime = spawntime.tointeger()
 	
-	if(!trainingActive){
-		if(spawnPositionData.len() < 32){
-			if(spawntime >= 5 && spawntime <= 60){
-				//local randomSpawnTimeFactor = RandomFloat(0.1, 1)
-				//spawntime += randomSpawnTimeFactor;
-				local pointer = getPointerPos(player)
-				if(isPointerValid(pointer, 32, 96, player)){
-					if(distanceToOtherSpawnsValid(pointer)){
-						local spawnModel = createStatue(inf)
-						DoEntFire("!self", "Alpha", dummyAlpha, 0, spawnModel, spawnModel)
-						createZombieSpawn(inf, pointer, spawntime, ColorStringToVector(inf.modelGlowColor))
-						spawnModel.SetOrigin(pointer)
-						dummySpawnModels.append(spawnModel)
-						zombieSpawnTypes.append(inf)
-						UpdateInfectedModels()
-					}else{
-						sendWarning(player, "Distance to next infected spawn is too small")
-					}
-				}else{
-					sendWarning(player, "Invalid Position!")
-				}
-			}else{
-				sendWarning(player, "Spawntime has to be between 5 and 60")
-			}
-		}else{
-			sendWarning(player, "Limit of 32 spawns has been reached.")
-		}
-	}else{
-		sendWarning(player, "Type !training to enter edit mode")
+	if(trainingActive){
+		sendWarning(player, "Type !training to enter edit mode");
+		return;
 	}
+
+	if(spawnPositionData.len() >= 32){
+		sendWarning(player, "Limit of 32 spawns has been reached.");
+		return;
+	}
+
+	if(spawntime < 5 || spawntime > 60){
+		sendWarning(player, "Spawntime has to be between 5 and 60");
+		return;
+	}
+
+	// local randomSpawnTimeFactor = RandomFloat(0.1, 1)
+	// spawntime += randomSpawnTimeFactor;
+
+	local pointer = getPointerPos(player)
+	
+	if(!isPointerValid(pointer, 32, 96, player)){
+		sendWarning(player, "Invalid Position!");
+		return;
+	}
+
+	if(!distanceToOtherSpawnsValid(pointer)){
+		sendWarning(player, "Distance to next infected spawn is too small");
+		return;
+	}
+
+	local spawnModel = createStatue(inf)
+	DoEntFire("!self", "Alpha", dummyAlpha, 0, spawnModel, spawnModel)
+	createZombieSpawn(inf, pointer, spawntime, ColorStringToVector(inf.modelGlowColor))
+	spawnModel.SetOrigin(pointer)
+	dummySpawnModels.append(spawnModel)
+	zombieSpawnTypes.append(inf)
+	UpdateInfectedModels()
 }
+	
+
+	
+
+
 
 
 
