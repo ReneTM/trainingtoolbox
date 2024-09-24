@@ -38,7 +38,7 @@ local arsenal =
 	// Become infected
 	"becomejockey","becomehunter","becomecharger","becomesmoker","becomespitter","becomeboomer","becometank","becomesurvivor","toggleghostmode","kill","tankrockselector","god","map","showmykeys",
 	"spectate","dummy","bots","removebots","addbot","showdamage","respawntanktoys","showtanktoys", "tanktoysalwaysvisible",
-	"strip", "stripall", "infectedtoggle", "checkbhops","timescale","movebot","movebots","botsholdpositions","savebotposition","camera","lockview","unlockview","distancetest"
+	"strip", "stripall", "infectedtoggle", "checkbhops","timescale","movebot","movebots","botsholdpositions","savebotposition","camera","lockview","unlockview","distancetest","weaponspawndebug","tankrockcamera"
 
 ]
 
