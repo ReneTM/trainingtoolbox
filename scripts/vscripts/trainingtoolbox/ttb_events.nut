@@ -148,6 +148,7 @@ function OnGameEvent_player_say(params){
 					case "deadstopping":	playInvisibleCommentary("#commentary/trainingtoolbox/com-TTB-deadstopping.wav", "ReneTM");	break
 					case "stopcommentary":	killAllNodes();																break
 					case "weaponstats":		outputWeaponStats(ent, GetPlayersActiveWeapon(ent));						break
+					case "weaponspawndebug": weaponSpawnDebug.ToggleWeaponDebugState(); break;
 					case "skinswitch":		SkinSwitch(ent);								break
 					case "frags":			fragStatsOutput(ent);							break
 					case "lerp":			getPlayerRates(ent);							break
@@ -165,7 +166,7 @@ function OnGameEvent_player_say(params){
 					case "escaperoute":			showEscapeRoute(ent);						break
 					case "toggleparticles":		toggleParticles();							break
 					case "toggledummyangles":	toggleDummyAngles();						break
-					case "eventdebug":			EventDebugPrintToggle(ent);					break
+					case "eventdebug":			EventDebugger.EventDebugPrintToggle(ent);	break
 					case "examplerock":			spawnExampleRock(ent);						break
 					case "distancetoexamplerock": getDistanceToExampleRock(ent);			break
 					case "togglenadeprediction"	: ToggleNadePrediction(ent);				break
@@ -180,6 +181,7 @@ function OnGameEvent_player_say(params){
 					case "respawntanktoys":			RespawnTankToys();						break
 					case "showtanktoys":			SetTankToysGlowingStatic(true);			break
 					case "tanktoysalwaysvisible":	ToggleAlwaysShowTankToys();				break
+					case "tankrockcamera":		TankrockCamera.toggleTankCamera(ent);		break
 
 					case "kill":				killHumanPlayer(ent);						break	
 					case "becomehunter":		becomeZombie(ent, ZOMBIETYPES.HUNTER);		break
@@ -256,7 +258,7 @@ function OnGameEvent_player_say(params){
 					case "cvar":				SetConvar(ent, parameter);					break
 					case "dummy":				SpawnDummy(ent, parameter);					break
 					case "bots":				SetAllowSurvivorBots(parameter);			break
-					case "timescale":			setTimeScale(ent, parameter);				break
+					case "timescale":			TimeScaler.setTimeScale(ent, parameter, true);	break
 					case "movebot":				botmover(ent, parameter);					break
 					case "savebotposition":		SaveBotPosition(ent, parameter);			break
 					case "lockview":			LockViewAngles(ent, parameter);				break
@@ -436,7 +438,6 @@ function OnGameEvent_witch_spawn(params){
 // ----------------------------------------------------------------------------------------------------------------------------
 
 function OnGameEvent_achievement_earned(param){
-	PrintEventDebug(param)
 }
 
 
@@ -508,8 +509,7 @@ function OnGameEvent_player_first_spawn(params){
 //
 // ----------------------------------------------------------------------------------------------------------------------------
 function OnGameEvent_player_connect(tParams){
-	if (tParams["networkid"] != "BOT")
-	{
+	if (tParams["networkid"] != "BOT"){
 		printl(format("[%s] SteamID - %s UserID - %d", tParams["name"], tParams["networkid"], tParams["userid"]));
 		ClientPrint(null, 3, format("Player %s has joined the game", tParams["name"]))
 	}
@@ -518,7 +518,6 @@ function OnGameEvent_player_connect(tParams){
 
 
 function OnGameEvent_player_disconnect(params){
-
 	//g_ModeScript.DeepPrintTable(params);
 	if(!("userid" in params)){
 		return;
@@ -545,7 +544,6 @@ function OnGameEvent_player_disconnect(params){
 
 
 function OnGameEvent_player_team(params){
-	
 	if (!("userid" in params)){
 		return;
 	}
