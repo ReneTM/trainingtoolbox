@@ -4,7 +4,7 @@
 //																						//
 //****************************************************************************************
 
-
+// Reference to MutationOptions: g_ModeScript
 
 MutationOptions <-
 {
@@ -33,6 +33,9 @@ MutationOptions <-
 	}
 
 	function AllowWeaponSpawn( classname ){
+		if(weaponSpawnDebug.WeaponDebugIsActive()){
+			return true;
+		}
 		if ( classname in weaponsToPreserve ){
 			return true
 		}
