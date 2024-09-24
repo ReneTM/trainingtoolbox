@@ -61,7 +61,6 @@ function toggleHumanRockLauncher(ent){
 
 
 function OnGameEvent_weapon_fire(params){
-    
 	local player = GetPlayerFromUserID(params.userid)
 	local playerscope = GetValidatedScriptScope(player)
 	

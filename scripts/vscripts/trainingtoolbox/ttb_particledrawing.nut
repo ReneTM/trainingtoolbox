@@ -83,10 +83,8 @@ function createCritParticle(victimVector, params){
 // Main analysis which infected got killed and how to handle that
 // ----------------------------------------------------------------------------------------------------------------------------
 
-function OnGameEvent_player_death(params)
-{
+function OnGameEvent_player_death(params){
 	recordSurvivorFrags(params)
-	
 	if("userid" in params){
 		if(PlayerWantsToDie(GetPlayerFromUserID(params["userid"]))){
 			SetPlayerWantsToDie(GetPlayerFromUserID(params["userid"]), false)
